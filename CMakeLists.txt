@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 2.8)
 project(ORB_SLAM2)
 
@@ -39,6 +40,16 @@ endif()
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 
+find_package(Boost 1.54.0 COMPONENTS system python program_options thread serialization regex unit_test_framework filesystem REQUIRED)
+SET ( RUNS_BOOST  ${Boost_SYSTEM_LIBRARY}
+                      #${Boost_PYTHON_LIBRARY} 
+                      ${Boost_REGEX_LIBRARY}
+                      ${Boost_THREAD_LIBRARY}
+                      ${Boost_PROGRAM_OPTIONS_LIBRARY}
+                      ${Boost_SERIALIZATION_LIBRARY}
+                      ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+                      )
+
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/include
@@ -68,12 +79,14 @@ src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
 src/Viewer.cc
+src/Console.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
+${RUNS_BOOST}
 ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 )
