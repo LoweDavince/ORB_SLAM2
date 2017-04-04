@@ -27,12 +27,40 @@
 #include<opencv2/core/core.hpp>
 
 #include<System.h>
+#include "sys/time.h" 
 
 using namespace std;
 
 void LoadImages(const string &strFile, vector<string> &vstrImageFilenames,
                 vector<double> &vTimestamps);
 
+class LoweTimer 
+{ 
+    public: 
+    LoweTimer (){}; 
+        void start()
+        {
+            gettimeofday(&start_,NULL);
+        }
+        /** \brief in ms  */
+        double getTimeCosts()
+        {
+            gettimeofday(&end_,NULL);
+            start_t = start_.tv_sec + double(start_.tv_usec) / 1e6;
+            end_t = end_.tv_sec + double(end_.tv_usec) / 1e6;
+            t_diff = end_t - start_t;
+            return t_diff*1000;
+
+        }
+        ~LoweTimer (){}; 
+
+    private: 
+        struct timeval start_;
+        struct timeval end_;
+        double start_t;
+        double end_t;
+        double t_diff;
+}; 
 int main(int argc, char **argv)
 {
     if(argc != 4)
@@ -62,10 +90,13 @@ int main(int argc, char **argv)
 
     // Main loop
     cv::Mat im;
+    LoweTimer t;
     for(int ni=0; ni<nImages; ni++)
     {
         // Read image from file
+        t.start();
         im = cv::imread(string(argv[3])+"/"+vstrImageFilenames[ni],CV_LOAD_IMAGE_UNCHANGED);
+        std::cout << "time costs " << t.getTimeCosts() <<std::endl;
         double tframe = vTimestamps[ni];
 
         if(im.empty())
