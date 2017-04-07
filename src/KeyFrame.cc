@@ -63,7 +63,8 @@ void KeyFrame::ComputeBoW()
         vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
         // Feature vector associate features with nodes in the 4th level (from leaves up)
         // We assume the vocabulary tree has 6 levels, change the 4 otherwise
-        mpORBvocabulary->transform(vCurrentDesc,mBowVec,mFeatVec,4);
+        mpORBvocabulary->transform(vCurrentDesc,mBowVec,mFeatVec,4); //TODO::mBowVec's words belong to 4 or 6?
+        //std::cout << mBowVec<< std::endl;
     }
 }
 
@@ -322,6 +323,8 @@ void KeyFrame::UpdateConnections()
     // This should not happen
     if(KFcounter.empty())
         return;
+    //std::cout << "tmp:" << KFcounter.size() <<std::endl;
+    //std::getchar();
 
     //If the counter is greater than threshold add connection
     //In case no keyframe counter is over threshold add the one with maximum counter

@@ -263,7 +263,7 @@ void MapPoint::ComputeDistinctiveDescriptors()
         KeyFrame* pKF = mit->first;
 
         if(!pKF->isBad())
-            vDescriptors.push_back(pKF->mDescriptors.row(mit->second));
+            vDescriptors.push_back(pKF->mDescriptors.row(mit->second));//TODO: mappoint index in keyframe same as keypoints index?? yes
     }
 
     if(vDescriptors.empty())
@@ -338,7 +338,7 @@ void MapPoint::UpdateNormalAndDepth()
         if(mbBad)
             return;
         observations=mObservations;
-        pRefKF=mpRefKF;
+        pRefKF=mpRefKF; //TODO:: how to set mpRefKF ??? MapPoint construct 
         Pos = mWorldPos.clone();
     }
 
@@ -358,9 +358,10 @@ void MapPoint::UpdateNormalAndDepth()
 
     cv::Mat PC = Pos - pRefKF->GetCameraCenter();
     const float dist = cv::norm(PC);
-    const int level = pRefKF->mvKeysUn[observations[pRefKF]].octave;
-    const float levelScaleFactor =  pRefKF->mvScaleFactors[level];
+    const int level = pRefKF->mvKeysUn[observations[pRefKF]].octave; //0 , 1 ...
+    const float levelScaleFactor =  pRefKF->mvScaleFactors[level]; // 1, 1.2 ...
     const int nLevels = pRefKF->mnScaleLevels;
+    //std::cout <<"tmp: " << level << " " << levelScaleFactor<< std::endl; 
 
     {
         unique_lock<mutex> lock3(mMutexPos);

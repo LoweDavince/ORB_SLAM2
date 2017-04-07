@@ -96,7 +96,7 @@ int main(int argc, char **argv)
         // Read image from file
         t.start();
         im = cv::imread(string(argv[3])+"/"+vstrImageFilenames[ni],CV_LOAD_IMAGE_UNCHANGED);
-        std::cout << "time costs " << t.getTimeCosts() <<std::endl;
+        //std::cout << "time costs " << t.getTimeCosts() <<std::endl;
         double tframe = vTimestamps[ni];
 
         if(im.empty())
@@ -134,6 +134,7 @@ int main(int argc, char **argv)
 
         if(ttrack<T)
             usleep((T-ttrack)*1e6);
+        std::getchar();
     }
 
     // Stop all threads

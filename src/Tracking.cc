@@ -36,6 +36,7 @@
 #include<iostream>
 
 #include<mutex>
+#include "Console.h" 
 
 
 using namespace std;
@@ -586,6 +587,7 @@ void Tracking::MonocularInitialization()
     }
     else
     {
+        LOWE_INFO("mCurrentFrame.mvKeys.size is %d" , mCurrentFrame.mvKeys.size());
         // Try to initialize
         if((int)mCurrentFrame.mvKeys.size()<=100)
         {
@@ -598,6 +600,8 @@ void Tracking::MonocularInitialization()
         // Find correspondences
         ORBmatcher matcher(0.9,true);
         int nmatches = matcher.SearchForInitialization(mInitialFrame,mCurrentFrame,mvbPrevMatched,mvIniMatches,100);
+        LOWE_INFO("mvIniMatches size is %d", mvIniMatches.size()); //initial frame keypoints size
+        LOWE_INFO("matches size is %d" , nmatches);
 
         // Check if there are enough correspondences
         if(nmatches<100)
@@ -612,6 +616,7 @@ void Tracking::MonocularInitialization()
         vector<bool> vbTriangulated; // Triangulated Correspondences (mvIniMatches)
 
         if(mpInitializer->Initialize(mCurrentFrame, mvIniMatches, Rcw, tcw, mvIniP3D, vbTriangulated))
+            //may always fail
         {
             for(size_t i=0, iend=mvIniMatches.size(); i<iend;i++)
             {
@@ -628,6 +633,8 @@ void Tracking::MonocularInitialization()
             Rcw.copyTo(Tcw.rowRange(0,3).colRange(0,3));
             tcw.copyTo(Tcw.rowRange(0,3).col(3));
             mCurrentFrame.SetPose(Tcw);
+            LOWE_INFO("mCurrentFrame Tcw:");
+            std::cout << Tcw << std::endl;
 
             CreateInitialMapMonocular();
         }
@@ -657,6 +664,7 @@ void Tracking::CreateInitialMapMonocular()
         //Create MapPoint.
         cv::Mat worldPos(mvIniP3D[i]);
 
+        //C. Map Points , KeyFrames and their selection
         MapPoint* pMP = new MapPoint(worldPos,pKFcur,mpMap);
 
         pKFini->AddMapPoint(pMP,i);
@@ -677,6 +685,7 @@ void Tracking::CreateInitialMapMonocular()
     }
 
     // Update Connections
+    LOWE_INFO("pKFini UpdateConnections");
     pKFini->UpdateConnections();
     pKFcur->UpdateConnections();
 
@@ -689,7 +698,7 @@ void Tracking::CreateInitialMapMonocular()
     float medianDepth = pKFini->ComputeSceneMedianDepth(2);
     float invMedianDepth = 1.0f/medianDepth;
 
-    if(medianDepth<0 || pKFcur->TrackedMapPoints(1)<100)
+    if(medianDepth<0 || pKFcur->TrackedMapPoints(1)<10)
     {
         cout << "Wrong initialization, reseting..." << endl;
         Reset();
@@ -702,7 +711,8 @@ void Tracking::CreateInitialMapMonocular()
     pKFcur->SetPose(Tc2w);
 
     // Scale points
-    vector<MapPoint*> vpAllMapPoints = pKFini->GetMapPointMatches();
+    //vector<MapPoint*> vpAllMapPoints = pKFini->GetMapPointMatches();
+    vector<MapPoint*> vpAllMapPoints = pKFcur->GetMapPointMatches(); //the same
     for(size_t iMP=0; iMP<vpAllMapPoints.size(); iMP++)
     {
         if(vpAllMapPoints[iMP])
